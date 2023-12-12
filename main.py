@@ -1,4 +1,5 @@
 import pygame
+from random import randint
 
 pygame.init()
 
@@ -8,7 +9,7 @@ screen_height = 1000
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Tic-Tac-Toe")
 
-D = 200
+D = 50
 bordeau = (135,48,74)
 cyan = (48, 120, 127)
 orange = (208, 92, 52)
@@ -24,7 +25,7 @@ def draw_o(posx,posy):
     pygame.draw.circle(screen,orange,((posx,posy)),D*0.5,5)
 
 def draw_tab1():
-    return [[pygame.Rect(w,h,333,333),True]for h in range(0,1000,333)for w in range(0,1000,333) ]
+    return [[pygame.Rect(w,h,111,111),True]for H in range(0,1000,333)for W in range(0,1000,333)for h in range(H,H+333,111)for w in range(W,W+333,111)]
 
 
 
@@ -33,6 +34,8 @@ turn = True
 X = []
 O = []
 rects = draw_tab1()
+counter = 0
+color = bordeau
 while run:
     screen.fill((31,31,31))
 
@@ -42,7 +45,14 @@ while run:
         draw_o(o[0],o[1])
     
     for rect in rects :
-        pygame.draw.rect(screen,bordeau,rect[0],5)
+        if counter != 9 :
+            print(color)
+            pygame.draw.rect(screen,color,rect[0],5)
+            counter += 1
+        else :
+            counter = 0
+            color = (randint(0,255),randint(0,255),randint(0,255))
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
