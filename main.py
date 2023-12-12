@@ -21,16 +21,11 @@ def draw_x(posx,posy):
 def draw_o(posx,posy):
     pygame.draw.circle(screen,(0,0,255),((posx,posy)),D*0.5,5)
 
-def draw_tab1(rects):
-    rects.append(pygame.Rect(0,0,333,333))
-    rects.append(pygame.Rect(0,0,333,666))
-    rects.append(pygame.Rect(0,0,333,999))
-    rects.append(pygame.Rect(0,0,666,333))
-    rects.append(pygame.Rect(0,0,666,666))
-    rects.append(pygame.Rect(0,0,666,999))
-    rects.append(pygame.Rect(0,0,999,333))
-    rects.append(pygame.Rect(0,0,999,666))
-    rects.append(pygame.Rect(0,0,999,999))
+def draw_tab1():
+    return [(pygame.Rect(0,0,w,h),True)for h in range(0,1000,333)for w in range(0,1000,333) ]
+
+
+
 
 
 
@@ -38,11 +33,10 @@ run = True
 turn = False
 X = []
 O = []
-rects = []
 while run:
     screen.fill((31,31,31))
 
-    draw_tab1(rects)
+    rects = draw_tab1()
 
     for x in X :
         draw_x(x[0],x[1])
@@ -50,7 +44,7 @@ while run:
         draw_o(o[0],o[1])
     
     for rect in rects :
-        pygame.draw.rect(screen,bordeau,rect,5)
+        pygame.draw.rect(screen,bordeau,rect)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -58,15 +52,17 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN :
             if event.button == 1:
                 for rect in rects :
-                    if rect.collidepoint(pygame.mouse.get_pos()) :
+                    if rect[0].collidepoint(pygame.mouse.get_pos()) and rect[1]:
                         if turn :
-                            X.append(rect.center)
+                            X.append(rect[0].center)
                             turn = False
+                            rect[1] = False
                         else : 
-                            O.append(rect.center)
+                            O.append(rect[0].center)
                             turn = True
+                            rect[1] = False
 
-    pygame.display.flip()
+    pygame.display.update()
 
 pygame.quit()
 
