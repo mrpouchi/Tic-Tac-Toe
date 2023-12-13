@@ -1,4 +1,5 @@
 import pygame
+from text import Text
 from random import randint
 
 pygame.init()
@@ -9,81 +10,159 @@ screen_height = 1000
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Tic-Tac-Toe")
 
-D = 50
-bordeau = (135,48,74)
-cyan = (48, 120, 127)
-orange = (208, 92, 52)
+class Squares():
+    big_grid = []
+    def __init__(self,rect,color,grid_num,line_num):
+        self.rect = rect
+        self.color = color
+        self.dark_color = (self.color[0]-70,self.color[1]-70,self.color[2]-70)
+        self.darken = None
+        self.x = None
+        Squares.big_grid[grid_num][line_num].append(self)
 
-def draw_x(posx,posy):
-    posx = posx-D/2
-    posy = posy-D/2
-    pygame.draw.line(screen,cyan,((posx,posy)),(posx+D,posy+D),8)
-    pygame.draw.line(screen,cyan,(posx,posy+D),(posx+D,posy),8)
-
-
-def draw_o(posx,posy):
-    pygame.draw.circle(screen,orange,((posx,posy)),D*0.5,5)
-
-def draw_tab1():
-    return [[pygame.Rect(w,h,111,111),True,None]for H in range(0,1000,333)for W in range(0,1000,333)for h in range(H,H+333,111)for w in range(W,W+333,111)]
-
-
-
+    def xo_draw(self) :
+        if self.x == 1 :
+            draw_x(self.rect.center,self.dark_color if self.darken else self.color,50)
+        if self.x == -1 :
+            draw_o(self.rect.center,self.dark_color if self.darken else self.color,50)
         
 
+def draw_x(pos,color,D):
+    posx = pos[0]-D/2
+    posy = pos[1]-D/2
+    pygame.draw.line(screen,color,(posx,posy),(posx+D,posy+D),int(D/8))
+    pygame.draw.line(screen,color,(posx,posy+D),(posx+D,posy),int(D/8))
+
+
+def draw_o(pos,color,D):
+    pygame.draw.circle(screen,color,pos,D*0.5,int(D/10))
 
 
 
+def manage_grid(grid,somme,small):
+    if small and (somme == 3 or somme == -3 or all(el.x  != None  for line in grid for el in line)):
+            for line in grid :
+                for square in line :
+                    square.darken = True
+                    square.x = 0 if square.x == None else square.x
 
-run = True
-turn = True
-X = []
-O = []
-rects = draw_tab1()
-counter = 0
-color = bordeau
+    if somme == 3:
+        if small :
+            draw_x(grid[1][1].rect.center,grid[1][1].color,200)
+            BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = 1
 
-for rect in rects :
-    if counter != 9 :
-        counter += 1
-    else :
-        counter = 0
-        rect[2] = (randint(0,255),randint(0,255),randint(0,255))
+        else : 
+            Retry() 
 
-while run:
-    screen.fill((31,31,31))
 
-    for x in X :
-        draw_x(x[0],x[1])
-    for o in O :
-        draw_o(o[0],o[1])
+    elif somme == -3:
+        if small :
+            draw_o(grid[1][1].rect.center,grid[1][1].color,200)
+            BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = -1
+        else : 
+            Retry() 
+
+
+    elif  all(el != 0 for line in grid for el in line) and not small:
+        Retry()
+
+
+def check_grid(GRID,small):
+    for grid in GRID :
+        somme1 = 0
+        somme2 = 0
+        for i in range(0,3):
+            somme = 0
+            for el in grid[i]:
+                somme += (el.x if el.x != None else 0)if small else el
+                manage_grid(grid,somme,small)
+
+            somme = 0
+            for el in grid:
+                somme += (el[i].x if el[i].x != None else 0)if small else el[i]
+                manage_grid(grid,somme,small)
+
+            somme1 += (grid[i][i].x if grid[i][i].x != None else 0)if small else grid[i][i]
+            somme2 += (grid[len(grid)-1-i][i].x if grid[len(grid)-1-i][i].x != None else 0)if small else grid[len(grid)-1-i][i]
+        manage_grid(grid,somme1,small)
+        manage_grid(grid,somme2,small)
+   
+
+def Main():
+    global main,BIG_GRID
+    main = True
+    turn = True
+    BIG_GRID = [[[0,0,0],[0,0,0],[0,0,0]]]
+    Squares.big_grid = [[[],[],[]]for i in range(9)]
+    grid_num = -1
+    line_num = -1
+    for H in range(0, 999, 333):
+        for W in range(0, 999, 333):
+            color = (randint(100, 255), randint(100, 255), randint(100, 255))
+            grid_num += 1
+            for h in range(H, H + 333, 111):
+                line_num += 1
+                if line_num == 2:
+                    line_num = -1
+                for w in range(W, W + 333, 111):
+                    Squares(pygame.Rect(w, h, 111, 111), color, grid_num, line_num)
     
-    
-    for rect in rects:
-        pygame.draw.rect(screen,rect[2],rect[0],5)
+    while main:
+        screen.fill((31,31,31))
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-        if event.type == pygame.MOUSEBUTTONDOWN :
-            if event.button == 1:
-                for rect in rects :
-                    if rect[0].collidepoint(event.pos) and rect[1]:
-                        if turn :
-                            X.append(rect[0].center)
-                            turn = not turn
-                            rect[1] = False
-                            print(X)
-                            
-                        else : 
-                            O.append(rect[0].center)
-                            turn = True
-                            rect[1] = not turn
-                            print(O)
 
-    pygame.display.update()
+        for grid in Squares.big_grid:
+            for line in grid :
+                for square in line :
+                    pygame.draw.rect(screen,square.dark_color if square.darken else square.color,square.rect,5)
+                    square.xo_draw()
 
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                main = False
+            if event.type == pygame.MOUSEBUTTONDOWN :
+                if event.button == 1:
+                    for grid in Squares.big_grid:
+                        for line in grid :
+                            for square in line :
+                                if square.rect.collidepoint(event.pos) and square.x == None:
+                                    if turn :
+                                        turn = not turn
+                                        square.x = 1
+                                        
+                                    else : 
+                                        turn = not turn
+                                        square.x = -1
+
+        check_grid(Squares.big_grid,True)                               
+        check_grid(BIG_GRID,False)
+
+        pygame.display.update()
+
+
+def Retry():
+    global retry,main
+    main = False
+    retry = True
+    while retry:
+        screen.fill((31, 31, 31))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                retry = False
+
+        if Text("Recommencer", pygame.font.Font("Postino.otf", 65), (78, 201, 164), screen_width * 0.2,screen_height / 2, screen, (108, 251, 194)).draw():
+            if pygame.mouse.get_pressed()[0]: 
+                Main()
+                retry = False
+        
+
+        pygame.display.update()
+
+Main()
 pygame.quit()
+
 
 
 
