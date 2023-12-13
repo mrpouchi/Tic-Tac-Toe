@@ -24,3 +24,5 @@ for i in range(0,3):
 
 big_grid = [[[],[],[]]for i in range(9)]
 print(big_grid)
+
+print(6%3)
