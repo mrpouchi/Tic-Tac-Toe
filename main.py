@@ -25,7 +25,15 @@ def draw_o(posx,posy):
     pygame.draw.circle(screen,orange,((posx,posy)),D*0.5,5)
 
 def draw_tab1():
-    return [[pygame.Rect(w,h,111,111),True]for H in range(0,1000,333)for W in range(0,1000,333)for h in range(H,H+333,111)for w in range(W,W+333,111)]
+    return [[pygame.Rect(W,H,111,111),True]for H in range(0,333,111)for W in range(0,333,111)]
+"""for h in range(H,H+333,111)for w in range(W,W+333,111)"""
+
+grid = [[0,0,0]
+        [0,0,0]
+        [0,0,0]]
+        
+
+
 
 
 
@@ -36,6 +44,13 @@ O = []
 rects = draw_tab1()
 counter = 0
 color = bordeau
+
+for rect in rects :
+        if counter != 9 :
+            counter += 1
+        else :
+            counter = 0
+            color = (randint(0,255),randint(0,255),randint(0,255))
 while run:
     screen.fill((31,31,31))
 
@@ -44,16 +59,9 @@ while run:
     for o in O :
         draw_o(o[0],o[1])
     
-    for rect in rects :
-        if counter != 9 :
-            print(color)
-            pygame.draw.rect(screen,color,rect[0],5)
-            counter += 1
-        else :
-            counter = 0
-            color = (randint(0,255),randint(0,255),randint(0,255))
-
-
+    
+    for rect in rects:
+        pygame.draw.rect(screen,color,rect[0],5)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -66,6 +74,7 @@ while run:
                             turn = not turn
                             rect[1] = False
                             print(X)
+                            
                         else : 
                             O.append(rect[0].center)
                             turn = True
