@@ -10,6 +10,9 @@ screen_height = 1000
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Tic-Tac-Toe")
 
+def randcol():
+    return (randint(100, 255), randint(100, 255), randint(100, 255))
+
 class Squares():
     big_grid = []
     def __init__(self,rect,color,grid_num,line_num):
@@ -40,7 +43,9 @@ def draw_o(pos,color,D):
 
 
 def manage_grid(grid,somme,small):
-    if small and (somme == 3 or somme == -3 or all(el.x  != None  for line in grid for el in line)):
+    global main
+
+    if small and (somme == 3 or somme == -3):
             for line in grid :
                 for square in line :
                     square.darken = True
@@ -50,21 +55,39 @@ def manage_grid(grid,somme,small):
         if small :
             draw_x(grid[1][1].rect.center,grid[1][1].color,200)
             BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = 1
-
-        else : 
-            Retry() 
-
+        else :
+            main = False
+            Retry("X")
 
     elif somme == -3:
         if small :
             draw_o(grid[1][1].rect.center,grid[1][1].color,200)
             BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = -1
-        else : 
-            Retry() 
+        else :
+            main = False
+            Retry("O")
 
+    elif small and all(el.x  != None  for line in grid for el in line) and BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] == None:
+        for line in grid :
+            for square in line :
+                square.darken = True
+                square.x = 0 if square.x == None else square.x
+                BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = 0
 
-    elif  all(el != 0 for line in grid for el in line) and not small:
-        Retry()
+    elif  all(el != None for line in grid for el in line) and not small: #que dans le grand quadrillage
+        SOMME = 0
+        for line in grid :
+            for el in line :
+                SOMME += el
+        if SOMME > 0 :
+            main = False
+            Retry("X")
+        elif SOMME < 0 :
+            main = False
+            Retry("O")
+        else :
+            main = False
+            Retry("Draw !")
 
 
 def check_grid(GRID,small):
@@ -74,16 +97,16 @@ def check_grid(GRID,small):
         for i in range(0,3):
             somme = 0
             for el in grid[i]:
-                somme += (el.x if el.x != None else 0)if small else el
+                somme += (el.x if el.x != None else 0)if small else (el if el != None else 0)
                 manage_grid(grid,somme,small)
 
             somme = 0
             for el in grid:
-                somme += (el[i].x if el[i].x != None else 0)if small else el[i]
+                somme += (el[i].x if el[i].x != None else 0)if small else (el[i] if el[i] != None else 0)
                 manage_grid(grid,somme,small)
 
-            somme1 += (grid[i][i].x if grid[i][i].x != None else 0)if small else grid[i][i]
-            somme2 += (grid[len(grid)-1-i][i].x if grid[len(grid)-1-i][i].x != None else 0)if small else grid[len(grid)-1-i][i]
+            somme1 += (grid[i][i].x if grid[i][i].x != None else 0)if small else (grid[i][i] if grid[i][i] != None else 0)
+            somme2 += (grid[len(grid)-1-i][i].x if grid[len(grid)-1-i][i].x != None else 0)if small else (grid[len(grid)-1-i][i] if grid[len(grid)-1-i][i] != None else 0)
         manage_grid(grid,somme1,small)
         manage_grid(grid,somme2,small)
    
@@ -92,7 +115,7 @@ def Main():
     global main,BIG_GRID
     main = True
     turn = True
-    BIG_GRID = [[[0,0,0],[0,0,0],[0,0,0]]]
+    BIG_GRID = [[[None,None,None]for i in range(3)]]
     Squares.big_grid = [[[],[],[]]for i in range(9)]
     grid_num = -1
     line_num = -1
@@ -109,7 +132,6 @@ def Main():
     
     while main:
         screen.fill((31,31,31))
-
 
         for grid in Squares.big_grid:
             for line in grid :
@@ -141,26 +163,54 @@ def Main():
         pygame.display.update()
 
 
-def Retry():
-    global retry,main
-    main = False
+def Retry(winner):
     retry = True
     while retry:
         screen.fill((31, 31, 31))
+
+        if winner == "Draw !" :
+            Text(winner, pygame.font.Font("Postino.otf", 80), (78, 201, 164), screen_width * 0.2,screen_height*0.3, screen).draw()
+
+        else :
+            Text(f"The {winner}'s won !", pygame.font.Font("Postino.otf", 80), (78, 201, 164), screen_width * 0.2,screen_height*0.3, screen).draw()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 retry = False
 
-        if Text("Recommencer", pygame.font.Font("Postino.otf", 65), (78, 201, 164), screen_width * 0.2,screen_height / 2, screen, (108, 251, 194)).draw():
+        if Text("Recommencer", pygame.font.Font("Postino.otf", 65), (78, 201, 164), screen_width * 0.2,screen_height / 2, screen).draw():
             if pygame.mouse.get_pressed()[0]: 
                 Main()
                 retry = False
-        
 
         pygame.display.update()
 
-Main()
+clock = pygame.time.Clock()
+def start():
+    start = True
+    while start:
+        screen.fill((31, 31, 31))
+
+        clock.tick(10)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                start = False
+
+        if Text("Start", pygame.font.Font("Postino.otf", 65), randcol(), screen_width * 0.38,screen_height*0.8, screen, (108, 251, 194)).draw((31,31,31),(108, 251, 194)):
+            if pygame.mouse.get_pressed()[0]: 
+                Main()
+                start = False
+
+        Text("Multi", pygame.font.Font("Postino.otf", 150),randcol(), screen_width * 0.25,screen_height*0.1, screen).draw()
+        Text("Tic", pygame.font.Font("Postino.otf", 150),randcol(), screen_width * 0.35,screen_height*0.25, screen).draw()
+        Text("Tac", pygame.font.Font("Postino.otf", 150),randcol(), screen_width * 0.35,screen_height*0.37, screen).draw()
+        Text("Toe", pygame.font.Font("Postino.otf", 150),randcol(), screen_width * 0.35,screen_height*0.49, screen).draw()
+
+
+        pygame.display.update()
+
+start()
 pygame.quit()
 
 
