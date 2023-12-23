@@ -109,9 +109,9 @@ def check_grid(GRID,small):
             somme2 += (grid[len(grid)-1-i][i].x if grid[len(grid)-1-i][i].x != None else 0)if small else (grid[len(grid)-1-i][i] if grid[len(grid)-1-i][i] != None else 0)
         manage_grid(grid,somme1,small)
         manage_grid(grid,somme2,small)
-   
 
-def Main():
+
+def Main(classical):
     global main,BIG_GRID
     main = True
     turn = True
@@ -132,12 +132,7 @@ def Main():
     
     while main:
         screen.fill((31,31,31))
-
-        for grid in Squares.big_grid:
-            for line in grid :
-                for square in line :
-                    pygame.draw.rect(screen,square.dark_color if square.darken else square.color,square.rect,5)
-                    square.xo_draw()
+        
 
 
         for event in pygame.event.get():
@@ -148,7 +143,8 @@ def Main():
                     for grid in Squares.big_grid:
                         for line in grid :
                             for square in line :
-                                if square.rect.collidepoint(event.pos) and square.x == None:
+                                if square.rect.collidepoint(event.pos) and square.x == None and square.darken != True :
+
                                     if turn :
                                         turn = not turn
                                         square.x = 1
@@ -157,6 +153,26 @@ def Main():
                                         turn = not turn
                                         square.x = -1
 
+                                    if not classical :
+                                        for grid2 in Squares.big_grid:
+                                            if Squares.big_grid.index(grid2) != grid.index(line)*3+line.index(square) :
+                                                for line2 in grid2 :
+                                                    for square2 in line2 :
+                                                        square2.darken = True
+                                            else :
+                                                for line2 in grid2 :
+                                                    for square2 in line2 :
+                                                        square2.darken = False
+
+
+
+        for grid in Squares.big_grid:
+            for line in grid :
+                for square in line :
+                    pygame.draw.rect(screen,square.dark_color if square.darken else square.color,square.rect,5)
+                    square.xo_draw()
+
+                    
         check_grid(Squares.big_grid,True)                               
         check_grid(BIG_GRID,False)
 
@@ -164,6 +180,7 @@ def Main():
 
 
 def Retry(winner):
+    main = False
     retry = True
     while retry:
         screen.fill((31, 31, 31))
@@ -178,9 +195,9 @@ def Retry(winner):
             if event.type == pygame.QUIT:
                 retry = False
 
-        if Text("Recommencer", pygame.font.Font("Postino.otf", 65), (78, 201, 164), screen_width * 0.2,screen_height / 2, screen).draw():
+        if Text("Recommencer", pygame.font.Font("Postino.otf", 65), (78, 201, 164), screen_width * 0.2,screen_height / 2, screen,(108, 251, 194)).draw():
             if pygame.mouse.get_pressed()[0]: 
-                Main()
+                start()
                 retry = False
 
         pygame.display.update()
@@ -188,6 +205,7 @@ def Retry(winner):
 clock = pygame.time.Clock()
 def start():
     start = True
+    gamemode = False
     while start:
         screen.fill((31, 31, 31))
 
@@ -197,10 +215,20 @@ def start():
             if event.type == pygame.QUIT:
                 start = False
 
-        if Text("Start", pygame.font.Font("Postino.otf", 65), randcol(), screen_width * 0.38,screen_height*0.8, screen, (108, 251, 194)).draw((31,31,31),(108, 251, 194)):
+        if Text("Start", pygame.font.Font("Postino.otf", 65), randcol(), screen_width * 0.38,screen_height*0.72, screen, (108, 251, 194)).draw((31,31,31),(108, 251, 194)):
             if pygame.mouse.get_pressed()[0]: 
-                Main()
-                start = False
+                gamemode = not gamemode
+        
+        if gamemode :
+            if Text("Advanced", pygame.font.Font("Postino.otf", 50), randcol(), screen_width * 0.6,screen_height*0.85, screen, (108, 251, 194)).draw((31,31,31),(108, 251, 194)):
+                if pygame.mouse.get_pressed()[0]:
+                    Main(False)
+                    start = False
+
+            if Text("Classical", pygame.font.Font("Postino.otf", 50), randcol(), screen_width * 0.1,screen_height*0.85, screen, (108, 251, 194)).draw((31,31,31),(108, 251, 194)):
+                if pygame.mouse.get_pressed()[0]:
+                    Main(True)
+                    start = False
 
         Text("Multi", pygame.font.Font("Postino.otf", 150),randcol(), screen_width * 0.25,screen_height*0.1, screen).draw()
         Text("Tic", pygame.font.Font("Postino.otf", 150),randcol(), screen_width * 0.35,screen_height*0.25, screen).draw()
