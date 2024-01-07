@@ -11,14 +11,14 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Tic-Tac-Toe")
 
 def randcol():
-    return (randint(100, 255), randint(100, 255), randint(100, 255))
+    return (randint(150, 255), randint(150, 255), randint(150, 255))
 
 class Squares():
     big_grid = []
     def __init__(self,rect,color,grid_num,line_num):
         self.rect = rect
         self.color = color
-        self.dark_color = (self.color[0]-70,self.color[1]-70,self.color[2]-70)
+        self.dark_color = (self.color[0]-100,self.color[1]-100,self.color[2]-100)
         self.darken = None
         self.x = None
         Squares.big_grid[grid_num][line_num].append(self)
