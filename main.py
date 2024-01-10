@@ -1,13 +1,19 @@
 import pygame
 from text import Text
 from random import randint
+from win32api import GetSystemMetrics
 
 pygame.init()
 
-screen_width = 1000
-screen_height = 1000
 
-screen = pygame.display.set_mode((screen_width, screen_height))
+screen_width = int(GetSystemMetrics(0)/2)
+screen_height = int(GetSystemMetrics(1)/1.2)
+
+screen_width = 999
+screen_height = 999
+
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
+
 pygame.display.set_caption("Tic-Tac-Toe")
 
 def randcol():
@@ -110,34 +116,48 @@ def check_grid(GRID,small):
         manage_grid(grid,somme1,small)
         manage_grid(grid,somme2,small)
 
-
-def Main(classical):
-    global main,BIG_GRID
-    main = True
-    turn = True
-    BIG_GRID = [[[None,None,None]for i in range(3)]]
-    Squares.big_grid = [[[],[],[]]for i in range(9)]
+def create_grid(sw, sh):
+    global BIG_GRID
+    BIG_GRID = [[[None, None, None] for _ in range(3)]]
+    Squares.big_grid = [[[], [], []] for _ in range(9)]
     grid_num = -1
-    line_num = -1
-    for H in range(0, 999, 333):
-        for W in range(0, 999, 333):
+
+    for H in range(0, sh, sh // 3):
+        line_num = -1
+        for W in range(0, sw, sw // 3):
             color = (randint(100, 255), randint(100, 255), randint(100, 255))
             grid_num += 1
-            for h in range(H, H + 333, 111):
+            for h in range(H, H + sh // 3 , sh // 6):
                 line_num += 1
                 if line_num == 2:
                     line_num = -1
-                for w in range(W, W + 333, 111):
-                    Squares(pygame.Rect(w, h, 111, 111), color, grid_num, line_num)
-    
+                for w in range(W, W + sw // 3 , sw // 6):
+                    if grid_num <= 8:
+                        Squares(pygame.Rect(w, h, sw // 6, sh // 6), color, grid_num, line_num)
+    print(Squares.big_grid)
+
+
+
+def Main(classical):
+    global main, screen_width,screen_height
+    main = True
+    turn = True
+    create_grid(screen_width,screen_height)
+
     while main:
         screen.fill((31,31,31))
-        
 
+        temp_width,temp_height = screen_width , screen_height
+        
+        screen_width , screen_height = pygame.display.get_surface().get_size()
+
+        if screen_width  != temp_width or screen_height != temp_height :
+            create_grid(screen_width,screen_height)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 main = False
+
             if event.type == pygame.MOUSEBUTTONDOWN :
                 if event.button == 1:
                     for grid in Squares.big_grid:
@@ -208,6 +228,8 @@ def start():
     gamemode = False
     while start:
         screen.fill((31, 31, 31))
+
+        screen_width, screen_height = pygame.display.get_surface().get_size()
 
         clock.tick(10)
 
