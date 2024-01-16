@@ -6,13 +6,10 @@ from win32api import GetSystemMetrics
 pygame.init()
 
 
-screen_width = int(GetSystemMetrics(0)/2)
-screen_height = int(GetSystemMetrics(1)/1.2)
+sw = int(GetSystemMetrics(0)/2)
+sh = int(GetSystemMetrics(1)/1.2)
 
-screen_width = 999
-screen_height = 999
-
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
+screen = pygame.display.set_mode((sw, sh), pygame.RESIZABLE)
 
 pygame.display.set_caption("Tic-Tac-Toe")
 
@@ -59,7 +56,7 @@ def manage_grid(grid,somme,small):
 
     if somme == 3:
         if small :
-            draw_x(grid[1][1].rect.center,grid[1][1].color,screen_width//5)
+            draw_x(grid[1][1].rect.center,grid[1][1].color,sw//5)
             BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = 1
         else :
             main = False
@@ -67,7 +64,7 @@ def manage_grid(grid,somme,small):
 
     elif somme == -3:
         if small :
-            draw_o(grid[1][1].rect.center,grid[1][1].color,screen_width//5)
+            draw_o(grid[1][1].rect.center,grid[1][1].color,sw//5)
             BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = -1
         else :
             main = False
@@ -116,43 +113,48 @@ def check_grid(GRID,small):
         manage_grid(grid,somme1,small)
         manage_grid(grid,somme2,small)
 
-def create_grid(sw, sh):
+def create_grid(sw, sh, colors):
     global BIG_GRID
     BIG_GRID = [[[None, None, None] for _ in range(3)]]
     Squares.big_grid = [[[], [], []] for _ in range(9)]
-    grid_num = -1
 
-    for H in range(0, sh, sh // 3):
-        line_num = -1  # Réinitialise line_num pour chaque nouvelle ligne
-        for W in range(0, sw, sw // 3):
-            color = (randint(100, 255), randint(100, 255), randint(100, 255))
-            grid_num += 1
-            for h in range(H, H + sh // 3, sh // 9):
-                line_num += 1
-                if line_num == 2:
-                    line_num = -1
-                for w in range(W, W + sw // 3, sw // 9):
-                    if grid_num <= 8:
-                        Squares(pygame.Rect(w, h, sw // 9, sh // 9), color, grid_num, line_num)
+    for grid_num in range(9):
+        line = grid_num // 3
+        col = grid_num % 3
+        grid_x = col * sw // 3
+        grid_y = line * sh // 3
+
+        for line_num in range(3):
+            for col_num in range(3):
+                square_x = grid_x + col_num * sw // 9
+                square_y = grid_y + line_num * sh // 9
+                rect = pygame.Rect(square_x, square_y, sw // 9, sh // 9)
+                Squares(rect, colors[grid_num], grid_num, line_num)
 
 
 
 
 def Main(classical):
-    global main
+    global main,screen
     main = True
     turn = True
     sw , sh = pygame.display.get_surface().get_size()
-    create_grid(sw,sh)
+    colors = [(randint(100, 255), randint(100, 255), randint(100, 255))for _ in range(9)]
+    create_grid(sw,sh,colors)
 
     while main:
         screen.fill((31,31,31))
 
+        sw, sh = pygame.display.get_surface().get_size()
 
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 main = False
+
+            elif event.type == pygame.VIDEORESIZE:
+                screen = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
+                create_grid(event.w, event.h, colors)
 
             if event.type == pygame.MOUSEBUTTONDOWN :
                 if event.button == 1:
@@ -202,16 +204,16 @@ def Retry(winner):
         screen.fill((31, 31, 31))
 
         if winner == "Draw !" :
-            Text(winner, pygame.font.Font("Postino.otf", 80), (78, 201, 164), screen_width * 0.2,screen_height*0.3, screen).draw()
+            Text(winner, pygame.font.Font("Postino.otf", 80), (78, 201, 164), sw * 0.2,sh*0.3, screen).draw()
 
         else :
-            Text(f"The {winner}'s won !", pygame.font.Font("Postino.otf", 80), (78, 201, 164), screen_width * 0.2,screen_height*0.3, screen).draw()
+            Text(f"The {winner}'s won !", pygame.font.Font("Postino.otf", 80), (78, 201, 164), sw * 0.2,sh*0.3, screen).draw()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 retry = False
 
-        if Text("Recommencer", pygame.font.Font("Postino.otf", 65), (78, 201, 164), screen_width * 0.2,screen_height / 2, screen,(108, 251, 194)).draw():
+        if Text("Recommencer", pygame.font.Font("Postino.otf", 65), (78, 201, 164), sw * 0.2,sh / 2, screen,(108, 251, 194)).draw():
             if pygame.mouse.get_pressed()[0]: 
                 start()
                 retry = False
