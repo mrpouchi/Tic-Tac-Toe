@@ -59,7 +59,7 @@ def manage_grid(grid,somme,small):
 
     if somme == 3:
         if small :
-            draw_x(grid[1][1].rect.center,grid[1][1].color,200)
+            draw_x(grid[1][1].rect.center,grid[1][1].color,screen_width//5)
             BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = 1
         else :
             main = False
@@ -67,7 +67,7 @@ def manage_grid(grid,somme,small):
 
     elif somme == -3:
         if small :
-            draw_o(grid[1][1].rect.center,grid[1][1].color,200)
+            draw_o(grid[1][1].rect.center,grid[1][1].color,screen_width//5)
             BIG_GRID[0][Squares.big_grid.index(grid) // 3][Squares.big_grid.index(grid) % 3] = -1
         else :
             main = False
@@ -123,36 +123,32 @@ def create_grid(sw, sh):
     grid_num = -1
 
     for H in range(0, sh, sh // 3):
-        line_num = -1
+        line_num = -1  # Réinitialise line_num pour chaque nouvelle ligne
         for W in range(0, sw, sw // 3):
             color = (randint(100, 255), randint(100, 255), randint(100, 255))
             grid_num += 1
-            for h in range(H, H + sh // 3 , sh // 6):
+            for h in range(H, H + sh // 3, sh // 9):
                 line_num += 1
                 if line_num == 2:
                     line_num = -1
-                for w in range(W, W + sw // 3 , sw // 6):
+                for w in range(W, W + sw // 3, sw // 9):
                     if grid_num <= 8:
-                        Squares(pygame.Rect(w, h, sw // 6, sh // 6), color, grid_num, line_num)
-    print(Squares.big_grid)
+                        Squares(pygame.Rect(w, h, sw // 9, sh // 9), color, grid_num, line_num)
+
 
 
 
 def Main(classical):
-    global main, screen_width,screen_height
+    global main
     main = True
     turn = True
-    create_grid(screen_width,screen_height)
+    sw , sh = pygame.display.get_surface().get_size()
+    create_grid(sw,sh)
 
     while main:
         screen.fill((31,31,31))
 
-        temp_width,temp_height = screen_width , screen_height
-        
-        screen_width , screen_height = pygame.display.get_surface().get_size()
 
-        if screen_width  != temp_width or screen_height != temp_height :
-            create_grid(screen_width,screen_height)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
